@@ -32,14 +32,14 @@ async function run() {
             const cursor = jobsCollection.find();
             const result = await cursor.toArray();
             res.send(result);
+            console.log(result);
         })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        // Ensures that the client will close when you finish/error
-        // await client.close();
+    } catch(error) {
+        console.error("Database connection error:", error);
     }
 }
 
@@ -47,6 +47,12 @@ app.get('/', (req, res) =>{
     res.send("Job Portal Server is running");
 })
 
-app.listen(port, () =>{
-    console.log(`Job Portal Server is running on port ${port}`);
-})
+// Call run function and then start server
+run().then(() => {
+    app.listen(port, () =>{
+        console.log(`Job Portal Server is running on port ${port}`);
+    });
+}).catch(error => {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+});
